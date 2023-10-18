@@ -1,1 +1,7 @@
-configfile: ""
+configfile: "config/config.yaml"
+
+include: "rules/compare-vcfs.smk"
+
+rule all:
+	input:
+		"results/intersection/intersection_upset.pdf"

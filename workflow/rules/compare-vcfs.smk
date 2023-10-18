@@ -42,12 +42,18 @@ rule intersect_vcfs:
 	output:
 		tsv="results/intersection/intersection.tsv",
 		vcf="results/intersection/intersection.vcf",
-		pdf="results/intersection/intersection.pdf"
+		pdf="results/intersection/intersection.pdf",
+		plot="results/intersection/intersection_upset.pdf"
 	conda:
 		"../envs/comparison.yml"
 	log:
-		"results/intersection/intersection.log"
+		intersect="results/intersection/intersection.log",
+		plot="results/intersection/plotting.log"
 	params:
-		names = callsets
+		names = callsets,
+		columns = ["in_" + c for c in callsets]
 	shell:
-		"python3 workflow/scripts/intersect_callsets.py intersect -c {input.callsets} -n {params.names} -t {output.tsv} -v {output.vcf} -p {output.pdf} &> {log}"
+		"""
+		python3 workflow/scripts/intersect_callsets.py intersect -c {input.callsets} -n {params.names} -t {output.tsv} -v {output.vcf} -p {output.pdf} &> {log.intersect}
+		python3 workflow/scripts/plot_upset.py -t {output.tsv} -o {output.plot} -n {params.columns} &> {log.plot}
+		"""
