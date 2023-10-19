@@ -16,18 +16,12 @@ rule vcf_stats:
 		"bcftools view {input} | python3 workflow/scripts/vcf_stats.py > {output}"
 
 
-def intersect_vcfs_files(wildcards):
-	files = []
-	for c in callsets:
-		files.append("results/vcfs/{callset}-tagged.vcf".format(callset = c))
-	return files
-
 
 rule add_tags:
 	input:
 		lambda wildcards: config["callset_vcfs"][wildcards.callset]
 	output:
-		temp("results/vcfs/{callset}-tagged.vcf")
+		"results/vcfs/{callset}-tagged.vcf"
 	wildcard_constraints:
 		callset = "|".join(callsets)
 	conda:
@@ -36,24 +30,45 @@ rule add_tags:
 		"bcftools view {input} | python3 workflow/scripts/add-svtags.py > {output}"
 
 
+rule extract_sample:
+	input:
+		"results/vcfs/{callset}-tagged.vcf"
+	output:
+		"results/vcfs/{callset}-tagged-{sample}.vcf"
+	conda:
+		"../envs/comparison.yml"
+	shell:
+		"bcftools view --samples {wildcards.sample} {input} | bcftools view --min-ac 1 > {output}"
+
+
+def intersect_vcfs_files(wildcards):
+	files = []
+	for c in callsets:
+		if wildcards.sample == "all":
+			files.append("results/vcfs/{callset}-tagged.vcf".format(callset = c))
+		else:
+			files.append("results/vcfs/{callset}-tagged-{sample}.vcf".format(callset = c, sample = wildcards.sample))
+	return files
+
+
 rule intersect_vcfs:
 	input:
 		intersect_vcfs_files
 	output:
-		tsv="results/intersection/intersection.tsv",
-		vcf="results/intersection/intersection.vcf",
-		pdf="results/intersection/intersection.pdf",
-		plot="results/intersection/intersection_upset.pdf"
+		tsv="results/intersection/intersection_{sample}.tsv",
+		vcf="results/intersection/intersection_{sample}.vcf",
+		pdf="results/intersection/intersection_{sample}.pdf",
+		plot="results/intersection/intersection_upset_{sample}.pdf"
 	conda:
 		"../envs/comparison.yml"
 	log:
-		intersect="results/intersection/intersection.log",
-		plot="results/intersection/plotting.log"
+		intersect="results/intersection/intersection_{sample}.log",
+		plot="results/intersection/plotting_{sample}.log"
 	params:
 		names = callsets,
 		columns = ["in_" + c for c in callsets]
 	shell:
 		"""
-		python3 workflow/scripts/intersect_callsets.py intersect -c {input.callsets} -n {params.names} -t {output.tsv} -v {output.vcf} -p {output.pdf} &> {log.intersect}
-		python3 workflow/scripts/plot_upset.py -t {output.tsv} -o {output.plot} -n {params.columns} &> {log.plot}
+		python3 workflow/scripts/intersect_callsets.py intersect -c {input} -n {params.names} -t {output.tsv} -v {output.vcf} -p {output.pdf} &> {log.intersect}
+		python3 workflow/scripts/plot-upset.py -t {output.tsv} -o {output.plot} -n {params.columns} &> {log.plot}
 		"""

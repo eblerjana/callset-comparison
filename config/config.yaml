@@ -1,4 +1,5 @@
 callset_vcfs:
- cuteSV: "/gpfs/project/projects/medbioinf/data/share/globus/1000g-ont/population_callsets/delins.sniffles.hg38.1kGP.ont.20Sep2023.vcf.gz"
- dellyDEL: "/gpfs/project/projects/medbioinf/users/ebler/long-read-1kg/data/population-vcfs/deletion.delly.hg38.1kGP.ont.19Sep2023.vcf.gz"
- dellyINS: "/gpfs/project/projects/medbioinf/users/ebler/long-read-1kg/data/population-vcfs/insertion.delly.hg38.1kGP.ont.14Sep2023.vcf.gz"
+ callsetname: ""
+
+# samples to restrict the analysis to. If left empty, all variants in VCF are considered.
+samples: []

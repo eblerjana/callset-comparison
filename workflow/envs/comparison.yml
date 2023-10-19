@@ -1,9 +1,11 @@
 name: comparison
 channels:
-  - http://conda.repo.test.hhu.de/conda-forge
-  - http://conda.repo.test.hhu.de/bioconda
-  - http://conda.repo.test.hhu.de/main
+  - conda-forge
+  - bioconda
+  - main
 dependencies:
   - samtools
   - bcftools
   - bedtools
+  - matplotlib
+  - pandas

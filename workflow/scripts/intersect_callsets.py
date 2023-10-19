@@ -270,6 +270,9 @@ def parse_vcf(filename, name, variants, vartypes, id_from_vcf=False):
         else:
             varlen = abs(int(info_field['SVLEN']))
 
+        if varlen < 50:
+            sys.stderr.write('Skipping variant at position ' + chrom + ':' + str(start) + ' in ' + filename + ' since its length is smaller than 50bp (no an SV).\n')
+            continue
         gts = {k : v for k,v in zip(fields[8].split(':'), fields[9].split(':'))}
 
         # determine read depth. Depending on caller, this is encoded in different fields
