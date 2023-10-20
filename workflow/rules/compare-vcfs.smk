@@ -13,7 +13,7 @@ rule vcf_stats:
 	wildcard_constraints:
 		callset = "|".join(callsets)
 	shell:
-		"bcftools view {input} | python3 workflow/scripts/vcf_stats.py > {output}"
+		"bcftools view -f PASS {input} | python3 workflow/scripts/vcf_stats.py > {output}"
 
 
 
@@ -27,7 +27,7 @@ rule add_tags:
 	conda:
 		"../envs/comparison.yml"
 	shell:
-		"bcftools view {input} | python3 workflow/scripts/add-svtags.py > {output}"
+		"bcftools view -f PASS {input} | python3 workflow/scripts/add-svtags.py > {output}"
 
 
 rule extract_sample:

@@ -7,6 +7,8 @@ for line in sys.stdin:
 	if line.startswith('#'):
 		print("##INFO=<ID=SVLEN,Number=1,Type=Integer,Description=\"Length of structural variation\">")
 		print("##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variation\">")
+		print(line.strip())
+		continue
 	fields = line.strip().split()
 
 

@@ -22,19 +22,21 @@ if __name__ == '__main__':
 	with PdfPages(args.output) as pdf:
 		plt.figure()
 		variants = df.groupby(by=args.names).size()
-		plt.figure()
+		fig = plt.figure()
 		upsetplot.plot(variants, sort_by='cardinality', show_counts='%d')
+		fig.tight_layout()
 		pdf.savefig()
 		plt.close()
 		
 		# one plot per variant type
 		vartypes = ["INS", "DEL", "INV", "DUP", "INVDUP", "CNV", "DUP:TANDEM"]
 		for vartype in vartypes:
-			plt.figure()
+			fig = plt.figure()
 			df_sub = df[df["var_type"] == vartype]
 			variants = df_sub.groupby(by=args.names).size()
 			upsetplot.plot(variants, sort_by='cardinality', show_counts='%d')
 			plt.suptitle(vartype)
+			fig.tight_layout()
 			pdf.savefig()
 			plt.close()
 		
