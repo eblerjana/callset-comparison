@@ -1,5 +1,11 @@
 callset_vcfs:
- callsetname: ""
+ callsetname1: "/path/tp/callset1.vcf.gz"
+ callsetname2: "/path/tp/callset2.vcf.gz"
 
 # samples to restrict the analysis to. If left empty, all variants in VCF are considered.
 samples: []
+
+# if desired, one can set a range for allele frequencies here. Only calls with allele frequencies within this
+# range are considered. Only relevant if input VCFs are multi-sample.
+min_af: 0.0
+max_af: 1.0
