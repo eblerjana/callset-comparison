@@ -62,7 +62,7 @@ rule intersect_vcfs:
 		pdf="results/intersection/intersection_{sample}.pdf",
 		plot="results/intersection/intersection_upset_{sample}.pdf"
 	conda:
-		"../envs/comparison.yml"
+		"../envs/plotting.yml"
 	log:
 		intersect="results/intersection/intersection_{sample}.log",
 		plot="results/intersection/plotting_{sample}.log"
