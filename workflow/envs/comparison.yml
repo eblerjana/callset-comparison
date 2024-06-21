@@ -9,3 +9,4 @@ dependencies:
   - bedtools
   - matplotlib
   - pandas
+  - upsetplot
