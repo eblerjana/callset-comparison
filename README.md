@@ -17,4 +17,4 @@ VCF files with SV calls. VCFs must be bi-allelic. If they are not, you can trans
 
 ## How to run
 
-After the config is set up, run the pipeline using the command `` snakemake -j <nr_of_cores> ``
+After the config is set up, run the pipeline using the command `` snakemake -j <nr_of_cores> --use-conda``
