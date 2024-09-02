@@ -1,8 +1,8 @@
 name: plotting
 channels:
-  - http://conda.repo.test.hhu.de/conda-forge
-  - http://conda.repo.test.hhu.de/bioconda
-  - http://conda.repo.test.hhu.de/main
+  - conda-forge
+  - bioconda
+  - main
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=0_gnu
@@ -80,5 +80,3 @@ dependencies:
   - xz=5.2.5=h516909a_0
   - zlib=1.2.11=h516909a_1006
   - zstd=1.4.5=h6597ccf_2
-prefix: /home/ebler/miniconda3/envs/genotyping-pipeline
-
