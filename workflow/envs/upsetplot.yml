@@ -1,4 +1,4 @@
-name: plotting
+name: upsetplotting
 channels:
   - conda-forge
   - bioconda
