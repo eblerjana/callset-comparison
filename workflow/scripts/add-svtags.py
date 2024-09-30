@@ -10,7 +10,18 @@ def get_type_from_alleles(ref_allele, alt_allele):
 		return "DEL"
 	else:
 		return "OTHER"
-	
+
+def get_type_from_ID(varid):
+	fields = varid.split('-')
+	vartype = fields[2]
+	assert vartype in ["SNV", "DEL", "INS", "COMPLEX"]
+	return vartype
+
+
+def get_len_from_ID(varid):
+	fields = varid.split('-')
+	varlen = fields[-1]
+	return varlen	
 
 if __name__ == "__main__":
 
@@ -75,7 +86,10 @@ if __name__ == "__main__":
 				info_fields["SVLEN"] = str(length)
 			if not svtype_present:
 				sys.stderr.write("Added SVTYPE for record " + fields[0] + ":" + fields[1] + "\n")
-				info_fields["SVTYPE"] = get_type_from_alleles(ref_allele, alt_allele)
+				if 'ID' in info_fields:
+					info_fields["SVTYPE"] = get_type_from_ID(info_fields['ID'])
+				else:
+					info_fields["SVTYPE"] = get_type_from_alleles(ref_allele, alt_alleles[0])
 		
 		fields[7] = ';'.join([k + "=" + v for k,v in info_fields.items()])
 		print('\t'.join(fields))

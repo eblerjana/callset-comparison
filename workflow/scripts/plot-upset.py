@@ -29,7 +29,7 @@ if __name__ == '__main__':
 		plt.close()
 		
 		# one plot per variant type
-		vartypes = ["INS", "DEL", "INV", "DUP", "INVDUP", "CNV", "DUP:TANDEM"]
+		vartypes = ["INS", "DEL", "COMPLEX", "OTHER", "INV", "DUP", "INVDUP", "CNV", "DUP:TANDEM"]
 		for vartype in vartypes:
 			fig = plt.figure()
 			df_sub = df[df["var_type"] == vartype]

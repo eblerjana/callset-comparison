@@ -3,6 +3,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
+import gzip
 
 def plot_distances(all_variants, vartypes, outname):
     """
@@ -164,8 +165,8 @@ def same_variant(var1, var2, only_different_callsets=False):
     if only_different_callsets and (var1.callset == var2.callset):
         return False
     assert var1.chrom == var2.chrom
-    # variants need to be of same type
-    if var1.vartype != var2.vartype:
+    # variants need to be of same type, COMPLEX/OTHER can match with any type
+    if (var1.vartype != var2.vartype) and (var1.vartype not in ["COMPLEX", "OTHER"]) and (var2.vartype not in ["COMPLEX", "OTHER"]):
         return False
     if reciprocal_overlap(var1, var2, 0.5) or coordinates_match(var1, var2):
         return True
@@ -271,9 +272,9 @@ def parse_vcf(filename, name, variants, vartypes, id_from_vcf=False):
             varlen = abs(int(info_field['SVLEN']))
 
         if varlen < 50:
-            sys.stderr.write('Skipping variant at position ' + chrom + ':' + str(start) + ' in ' + filename + ' since its length is smaller than 50bp (no an SV).\n')
+            sys.stderr.write('Skipping variant at position ' + chrom + ':' + str(start) + ' in ' + filename + ' since its length is smaller than 50bp (not an SV).\n')
             continue
-        gts = {k : v for k,v in zip(fields[8].split(':'), fields[9].split(':'))}
+        gts = {k : v for k,v in zip(fields[8].split(':'), fields[9].split(':'))} if len(fields) > 8 else {}
 
         # determine read depth. Depending on caller, this is encoded in different fields
         read_depth = 'nan'
@@ -299,11 +300,44 @@ def parse_vcf(filename, name, variants, vartypes, id_from_vcf=False):
 
         variant = Variant(chrom, start, end, varlen, vartype, name, quality, read_depth, allele_depth)
         if id_from_vcf:
-            variant.id = fields[2]
+            if 'ID' in info_field:
+               variant.id = info_field['ID']
+            elif fields[2] != '.':
+               variant.id = fields[2]
         variants.append(variant)
         vartypes.add(vartype)
         var_counter += 1
 
+    return var_counter
+
+
+def parse_pav_tsv(filename, name, variants, vartypes):
+    """
+        Reads PAV intersection table
+        and stores variant objects.
+    """
+    var_counter = 0
+    for line in gzip.open(filename, 'rt'):
+        if line.startswith('ID'):
+            continue
+        fields = line.split('\t')
+        chrom = fields[1]
+        start = int(fields[2])
+        end = int(fields[3])
+        varlen = int(fields[5])
+        if varlen < 50:
+            sys.stderr.write('Skipping variant at position ' + chrom + ':' + str(start) + ' in ' + filename + ' since its length is smaller than 50bp (not an SV).\n')
+            continue
+        vartype = fields[4]
+        quality = '.'
+        read_depth = 'nan'
+        allele_depth = 'nan'
+        variant = Variant(chrom, start, end, varlen, vartype, name, quality, read_depth, allele_depth)
+        # set ID to the one given in table
+        variant.id = fields[0]
+        variants.append(variant)
+        vartypes.add(vartype)
+        var_counter += 1
     return var_counter
 
 
@@ -335,7 +369,9 @@ def parse_table(filename, variants, fulltable):
     return var_counter
 
 
-def run_intersect(callsets, names, outtable, outvcf, outpdf):
+
+
+def run_intersect(callsets, names, outtable, outvcf, outpdf, id_from_vcf):
     """
         Runs intersect command.
     """   
@@ -343,7 +379,10 @@ def run_intersect(callsets, names, outtable, outvcf, outpdf):
     variants = []
     vartypes = set([])
     for callset, name in zip(callsets, names):
-        count = parse_vcf(callset, name, variants, vartypes)
+        if callset.endswith(".vcf"):
+            count = parse_vcf(callset, name, variants, vartypes, id_from_vcf)
+        else:
+            count = parse_pav_tsv(callset, name, variants, vartypes)
         sys.stderr.write('Read ' + str(count) + ' variants from ' + callset + '.\n')
     variants.sort()
     # plot distances between variants of same type
@@ -409,6 +448,7 @@ if __name__ == '__main__':
     parser_intersect.add_argument('-v', '--vcf', required=True, help='Name of the output files.')
     parser_intersect.add_argument('-p', '--pdf', required=True, help='Name of the output files.')
     parser_intersect.add_argument('-n', '--names', nargs='+', required=True, default=[], help='Callset names. One per given VCF file.')
+    parser_intersect.add_argument('--id-from-vcf', required=False, action='store_true', default=False, help='Use the variant IDs from VCF.')
 
     parser_annotate = subparsers.add_parser('annotate', help='Add column indicating whether variant was seen in a given callset.')
     parser_annotate.add_argument('-t', '--table', required=True, help='Table created by intersect.')
@@ -417,7 +457,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if args.subparser_name == "intersect":
-        run_intersect(args.callsets, args.names, args.table, args.vcf, args.pdf)
+        run_intersect(args.callsets, args.names, args.table, args.vcf, args.pdf, args.id_from_vcf)
     elif args.subparser_name == "annotate":
         run_annotate(args.table, args.vcf, args.name)
 

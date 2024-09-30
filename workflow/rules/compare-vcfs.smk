@@ -71,6 +71,6 @@ rule intersect_vcfs:
 		columns = ["in_" + c for c in callsets]
 	shell:
 		"""
-		python3 workflow/scripts/intersect_callsets.py intersect -c {input} -n {params.names} -t {output.tsv} -v {output.vcf} -p {output.pdf} &> {log.intersect}
+		python3 workflow/scripts/intersect_callsets.py intersect -c {input} -n {params.names} -t {output.tsv} -v {output.vcf} -p {output.pdf} --id-from-vcf &> {log.intersect}
 		python3 workflow/scripts/plot-upset.py -t {output.tsv} -o {output.plot} -n {params.columns} &> {log.plot}
 		"""
