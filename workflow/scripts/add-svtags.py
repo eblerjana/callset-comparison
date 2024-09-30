@@ -82,8 +82,11 @@ if __name__ == "__main__":
 			# as it can be directly derived from start and ALT allele.
 			if not svlen_present:
 				sys.stderr.write("Added SVLEN for record " + fields[0] + ":" + fields[1] + "\n")
-				length = max([len(ref_allele), len(alt_allele)])
-				info_fields["SVLEN"] = str(length)
+				if 'ID' in info_fields:
+					info_fields["SVLEN"] = get_len_from_ID(info_fields['ID'])
+				else:
+					length = max([len(ref_allele), len(alt_allele)])
+					info_fields["SVLEN"] = str(length)
 			if not svtype_present:
 				sys.stderr.write("Added SVTYPE for record " + fields[0] + ":" + fields[1] + "\n")
 				if 'ID' in info_fields:
