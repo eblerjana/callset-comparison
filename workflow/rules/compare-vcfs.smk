@@ -26,10 +26,12 @@ rule add_tags:
 		"results/vcfs/{callset}-tagged.vcf"
 	wildcard_constraints:
 		callset = "|".join(callsets)
+	log:
+		"results/vcfs/{callset}-tagged.log"
 	conda:
 		"../envs/comparison.yml"
 	shell:
-		"zcat {input} | python3 workflow/scripts/set-pass.py | bcftools view -f PASS --min-af {min_af} --max-af {max_af} | python3 workflow/scripts/add-svtags.py > {output}"
+		"zcat {input} | python3 workflow/scripts/set-pass.py | bcftools view -f PASS --min-af {min_af} --max-af {max_af} | python3 workflow/scripts/add-svtags.py 2> {log} 1> {output}"
 
 
 rule extract_sample:
