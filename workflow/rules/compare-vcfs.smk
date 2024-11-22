@@ -3,11 +3,28 @@ configfile: "config/config.yaml"
 callsets = [c for c in config["callset_vcfs"].keys()]
 max_af = config['max_af']
 min_af = config['min_af']
+normalize = config["reference"] != ""
+
+
+rule normalize_vcf:
+	input:
+		vcf = lambda wildcards: config["callset_vcfs"][wildcards.callset],
+		reference = config["reference"]
+	output:
+		"results/vcfs/{callset}-normalized.vcf.gz"
+	conda:
+		"../envs/comparison.yml"
+	wildcard_constraints:
+		callset = "|".join(callsets)
+	shell:
+		"""
+		bcftools norm -c x -f {input.reference} {input.vcf} -Oz -o {output}
+		"""
 
 
 rule vcf_stats:
 	input:
-		lambda wildcards: config["callset_vcfs"][wildcards.callset]
+		lambda wildcards: "results/vcfs/{callset}-normalized.vcf.gz" if normalize else config["callset_vcfs"][wildcards.callset]
 	output:
 		"results/vcf-stats/{callset}.stats"
 	conda:
@@ -21,7 +38,7 @@ rule vcf_stats:
 
 rule add_tags:
 	input:
-		lambda wildcards: config["callset_vcfs"][wildcards.callset]
+		lambda wildcards: "results/vcfs/{callset}-normalized.vcf.gz" if normalize else config["callset_vcfs"][wildcards.callset]
 	output:
 		"results/vcfs/{callset}-tagged.vcf"
 	wildcard_constraints:
@@ -30,8 +47,10 @@ rule add_tags:
 		"results/vcfs/{callset}-tagged.log"
 	conda:
 		"../envs/comparison.yml"
+	params:
+		ignore_ids = "--ignore-ids" if normalize else ""
 	shell:
-		"zcat {input} | python3 workflow/scripts/set-pass.py | bcftools view -f PASS --min-af {min_af} --max-af {max_af} | python3 workflow/scripts/add-svtags.py 2> {log} 1> {output}"
+		"zcat {input} | python3 workflow/scripts/set-pass.py | bcftools view -f PASS --min-af {min_af} --max-af {max_af} | python3 workflow/scripts/add-svtags.py {params.ignore_ids} 2> {log} 1> {output}"
 
 
 rule extract_sample:

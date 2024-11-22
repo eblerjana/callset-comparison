@@ -1,6 +1,10 @@
 callset_vcfs:
- callsetname1: "/path/tp/callset1.vcf.gz"
- callsetname2: "/path/tp/callset2.vcf.gz"
+ callsetname1: "/path/to/callset1.vcf.gz"
+ callsetname2: "/path/to/callset2.vcf.gz"
+
+# If reference is provided, all callsets will be normalized prior to comparison.
+# If empty string ("") is provided, normalization is skipped.
+reference: ""
 
 # samples to restrict the analysis to. If left empty, all variants in VCF are considered.
 samples: []

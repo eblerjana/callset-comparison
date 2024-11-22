@@ -1,4 +1,5 @@
 import sys
+import argparse
 
 def get_type_from_alleles(ref_allele, alt_allele):
 	"""
@@ -24,6 +25,9 @@ def get_len_from_ID(varid):
 	return varlen	
 
 if __name__ == "__main__":
+	parser = argparse.ArgumentParser(prog='add-svtags.py', description=__doc__)
+	parser.add_argument('--ignore-ids', required=False, action='store_true', default=False, help='Ignore SV type and length information provided in ID tags.')
+	args = parser.parse_args()
 
 	# keep track whether header line contains SVTYPE, SVLEN, END tag descriptions
 	header_svtype = False
@@ -82,14 +86,14 @@ if __name__ == "__main__":
 			# as it can be directly derived from start and ALT allele.
 			if not svlen_present:
 				sys.stderr.write("Added SVLEN for record " + fields[0] + ":" + fields[1] + "\n")
-				if 'ID' in info_fields:
+				if 'ID' in info_fields and not args.ignore_ids:
 					info_fields["SVLEN"] = get_len_from_ID(info_fields['ID'])
 				else:
 					length = max([len(ref_allele), len(alt_allele)])
 					info_fields["SVLEN"] = str(length)
 			if not svtype_present:
 				sys.stderr.write("Added SVTYPE for record " + fields[0] + ":" + fields[1] + "\n")
-				if 'ID' in info_fields:
+				if 'ID' in info_fields and not args.ignore_ids:
 					info_fields["SVTYPE"] = get_type_from_ID(info_fields['ID'])
 				else:
 					info_fields["SVTYPE"] = get_type_from_alleles(ref_allele, alt_alleles[0])

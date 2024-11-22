@@ -8,7 +8,7 @@ The pipeline computes overlaps between the different callsets based on reciproca
 
 ## How to set up
 
-Add paths to callset VCFs to the config file located in `` config/``. If the analysis should be restricted to a specific sample (e.g. in case the VCFs contain multiple samples), you can specify a list of samples in the config file. The analysis will then be run separately for each of these samples. If no samples are given, all variants in the VCF will be used.
+Add paths to callset VCFs to the config file located in `` config/``. If the analysis should be restricted to a specific sample (e.g. in case the VCFs contain multiple samples), you can specify a list of samples in the config file. The analysis will then be run separately for each of these samples. If no samples are given, all variants in the VCF will be used. If a reference genome is provided in the config, the VCFs will be normalized prior to comparison. If no reference is provided, normalization is skipped.
 
 
 ## Required input data
